@@ -1,28 +1,25 @@
 package com.randoms.pictures.memes.jokes.facts.quotes.activities.excuses.advices.app.presentation.activities
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.WindowCompat
-import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavOptions
 import androidx.navigation.createGraph
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.fragment
+import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.AdView
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import dagger.hilt.android.AndroidEntryPoint
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 import com.randoms.pictures.memes.jokes.facts.quotes.activities.excuses.advices.app.R
 import com.randoms.pictures.memes.jokes.facts.quotes.activities.excuses.advices.app.core.extensions.adsInitialize
 import com.randoms.pictures.memes.jokes.facts.quotes.activities.excuses.advices.app.databinding.ActivityMainBinding
-import com.randoms.pictures.memes.jokes.facts.quotes.activities.excuses.advices.app.presentation.fragments.FactsFragment
-import com.randoms.pictures.memes.jokes.facts.quotes.activities.excuses.advices.app.presentation.fragments.JokesFragment
-import com.randoms.pictures.memes.jokes.facts.quotes.activities.excuses.advices.app.presentation.fragments.MoreFragment
+import com.randoms.pictures.memes.jokes.facts.quotes.activities.excuses.advices.app.presentation.fragments.*
 import com.randoms.pictures.memes.jokes.facts.quotes.activities.excuses.advices.app.presentation.navigation.NavRoutes
-import com.randoms.pictures.memes.jokes.facts.quotes.activities.excuses.advices.app.presentation.fragments.PicturesFragment
-import com.randoms.pictures.memes.jokes.facts.quotes.activities.excuses.advices.app.presentation.fragments.QuotesFragment
+import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -32,7 +29,11 @@ class MainActivity : AppCompatActivity() {
     private val navController by lazy {
         (supportFragmentManager.findFragmentById(R.id.hostFragment) as NavHostFragment).navController
     }
-    
+
+    private var mInterstitialAd: InterstitialAd? = null
+
+    private var counter = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
@@ -68,10 +69,11 @@ class MainActivity : AppCompatActivity() {
                 toolbar.title = destination.label.toString()
             }
 
-            bottomNav.setupWithNavControllerCustom(navController)
+            setupWithNavControllerCustom()
         }
 
         loadBannerAd()
+        loadInterstitialAd()
     }
 
     public override fun onPause() {
@@ -94,9 +96,57 @@ class MainActivity : AppCompatActivity() {
         binding.adView.loadAd(adRequest)
     }
 
-    private fun BottomNavigationView.setupWithNavControllerCustom(
-        navController: NavController
-    ) {
+    private fun loadInterstitialAd() {
+        val adRequest = AdRequest.Builder().build()
+
+        InterstitialAd.load(
+            this,
+            "ca-app-pub-9612143868526251/4951366788",
+            adRequest,
+            object : InterstitialAdLoadCallback() {
+                override fun onAdFailedToLoad(adError: LoadAdError) {
+                    mInterstitialAd = null
+                }
+
+                override fun onAdLoaded(interstitialAd: InterstitialAd) {
+                    mInterstitialAd = interstitialAd
+                }
+            }
+        )
+
+        mInterstitialAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdClicked() {
+                // Called when a click is recorded for an ad.
+            }
+
+            override fun onAdDismissedFullScreenContent() {
+                // Called when ad is dismissed.
+                mInterstitialAd = null
+            }
+
+            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                // Called when ad fails to show.
+                mInterstitialAd = null
+            }
+
+            override fun onAdImpression() {
+                // Called when an impression is recorded for an ad.
+            }
+
+            override fun onAdShowedFullScreenContent() {
+                // Called when ad is shown.
+            }
+        }
+    }
+
+    private fun showInterstitialAd() {
+        if (counter == 5) {
+            counter = 0
+            mInterstitialAd?.show(this)
+        }
+    }
+
+    private fun setupWithNavControllerCustom() {
         val options = NavOptions.Builder()
             .setLaunchSingleTop(true)
             .setRestoreState(true)
@@ -107,7 +157,11 @@ class MainActivity : AppCompatActivity() {
             )
             .build()
 
-        setOnItemSelectedListener { item ->
+        binding.bottomNav.setOnItemSelectedListener { item ->
+            showInterstitialAd()
+
+            counter += 1
+
             when (item.itemId) {
                 R.id.pictures -> {
                     navController.navigate(NavRoutes.pictures, options)
