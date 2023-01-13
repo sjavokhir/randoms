@@ -1,0 +1,8 @@
+<resources>
+
+    <style name="Base.Theme.Randoms" parent="Theme.Material3.DayNight.NoActionBar" />
+
+    <style name="Theme.Randoms" parent="Base.Theme.Randoms">
+        <item name="android:colorPrimaryDark">@color/black</item>
+    </style>
+</resources>

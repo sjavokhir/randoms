@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<resources>
+    <string name="app_name">Randoms</string>
+    <string name="download_completed">Download completed</string>
+    <string name="download_failed">Download failed</string>
+    <string name="download_started">Download started</string>
+    <string name="downloading">Download…</string>
+    <string name="file">File</string>
+    <string name="image_content">Image</string>
+    <string name="menu_facts">Facts</string>
+    <string name="menu_memes">Memes</string>
+    <string name="menu_more">More</string>
+    <string name="menu_pictures">Pictures</string>
+    <string name="menu_quotes">Quotes</string>
+    <string name="title_facts">Facts</string>
+    <string name="title_memes">Meme &amp; Jokes</string>
+    <string name="title_more">More activities</string>
+    <string name="title_pictures">Random pictures</string>
+    <string name="title_quotes">Quotes</string>
+    <string name="refresh">Refresh</string>
+    <string name="download">Download</string>
+    <string name="share">Share</string>
+</resources>
