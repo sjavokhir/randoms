@@ -1,7 +1,6 @@
 package com.randoms.pictures.memes.jokes.facts.quotes.activities.excuses.advices.app.presentation.activities
 
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavOptions
@@ -92,6 +91,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun loadBannerAd() {
+        return
         val adRequest = AdRequest.Builder().build()
         binding.adView.loadAd(adRequest)
     }
@@ -144,6 +144,8 @@ class MainActivity : AppCompatActivity() {
             counter = 0
             mInterstitialAd?.show(this)
         }
+
+        counter += 1
     }
 
     private fun setupWithNavControllerCustom() {
@@ -159,8 +161,6 @@ class MainActivity : AppCompatActivity() {
 
         binding.bottomNav.setOnItemSelectedListener { item ->
             showInterstitialAd()
-
-            counter += 1
 
             when (item.itemId) {
                 R.id.pictures -> {

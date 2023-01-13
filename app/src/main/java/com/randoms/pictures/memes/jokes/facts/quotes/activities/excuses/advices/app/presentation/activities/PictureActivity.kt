@@ -3,7 +3,12 @@ package com.randoms.pictures.memes.jokes.facts.quotes.activities.excuses.advices
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.rewarded.RewardedAd
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.randoms.pictures.memes.jokes.facts.quotes.activities.excuses.advices.app.core.extensions.*
 import com.randoms.pictures.memes.jokes.facts.quotes.activities.excuses.advices.app.core.helpers.DownloaderManager
 import com.randoms.pictures.memes.jokes.facts.quotes.activities.excuses.advices.app.data.UIState
@@ -26,7 +31,10 @@ class PictureActivity : AppCompatActivity() {
     @Inject
     lateinit var downloaderManager: DownloaderManager
 
+    private var mRewardedAd: RewardedAd? = null
+
     private var downloadUrl: String? = null
+    private var counter = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +48,7 @@ class PictureActivity : AppCompatActivity() {
             buttonRefresh.onClick {
                 downloadUrl = ""
                 viewModel.getRandom()
+                showRewardedAd()
             }
             buttonDownload.onClick {
                 if (!downloadUrl.isNullOrEmpty()) downloaderManager.download(downloadUrl)
@@ -49,6 +58,7 @@ class PictureActivity : AppCompatActivity() {
         viewModel.random.observe(this) { onRandomImage(it) }
 
         loadBannerAd()
+        loadRewardedAd()
     }
 
     public override fun onPause() {
@@ -90,5 +100,56 @@ class PictureActivity : AppCompatActivity() {
     private fun loadBannerAd() {
         val adRequest = AdRequest.Builder().build()
         binding.adView.loadAd(adRequest)
+    }
+
+    private fun loadRewardedAd() {
+        val adRequest = AdRequest.Builder().build()
+        RewardedAd.load(
+            this,
+            "ca-app-pub-9612143868526251/9765813417",
+            adRequest,
+            object : RewardedAdLoadCallback() {
+                override fun onAdFailedToLoad(adError: LoadAdError) {
+                    mRewardedAd = null
+                }
+
+                override fun onAdLoaded(rewardedAd: RewardedAd) {
+                    mRewardedAd = rewardedAd
+                }
+            })
+
+        mRewardedAd?.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdClicked() {
+                // Called when a click is recorded for an ad.
+            }
+
+            override fun onAdDismissedFullScreenContent() {
+                // Called when ad is dismissed.
+                // Set the ad reference to null so you don't show the ad a second time.
+                mRewardedAd = null
+            }
+
+            override fun onAdFailedToShowFullScreenContent(adError: AdError) {
+                // Called when ad fails to show.
+                mRewardedAd = null
+            }
+
+            override fun onAdImpression() {
+                // Called when an impression is recorded for an ad.
+            }
+
+            override fun onAdShowedFullScreenContent() {
+                // Called when ad is shown.
+            }
+        }
+    }
+
+    private fun showRewardedAd() {
+        if (counter == 5) {
+            counter = 0
+            mRewardedAd?.show(this) {}
+        }
+
+        counter += 1
     }
 }
